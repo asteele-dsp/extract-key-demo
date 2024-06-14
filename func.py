@@ -10,7 +10,7 @@ import oci.ai_document
 import oci.object_storage
 import oci.retry
 
-# from datetime import datetime
+from datetime import datetime
 from fdk import response
 
 try:
@@ -79,7 +79,22 @@ def format_document_json(json_input):
                     field["fieldValue"].pop("wordIndexes", None)
 
                 if field["fieldType"] == "LINE_ITEM_GROUP":
-                    page["documentFields"].pop(i)
+                    # page["documentFields"].pop(i)
+
+                    for item in field["fieldValue"]["items"]:
+                        item.pop("fieldLabel", None)
+                        item.pop("fieldName", None)
+                        item["fieldValue"].pop("text", None)
+                        item["fieldValue"].pop("confidence", None)
+                        item["fieldValue"].pop("boundingPolygon", None)
+                        item["fieldValue"].pop("wordIndexes", None)
+
+                        for item in item["fieldValue"]["items"]:
+                            item.pop("fieldName", None)
+                            item["fieldValue"].pop("text", None)
+                            item["fieldValue"].pop("confidence", None)
+                            item["fieldValue"].pop("boundingPolygon", None)
+                            item["fieldValue"].pop("wordIndexes", None)
 
     json_input.pop("detectedDocumentTypes", None)
     json_input.pop("detectedLanguages", None)
@@ -131,7 +146,7 @@ def extract_key_value(body):
         ),
     )
 
-    # time_started = datetime.now().isoformat()
+    time_started = datetime.now().isoformat()
 
     create_processor_response = (
         ai_document_client.create_processor_job_and_wait_for_state(
@@ -143,10 +158,10 @@ def extract_key_value(body):
         )
     )
 
-    # time_finished = datetime.now().isoformat()
+    time_finished = datetime.now().isoformat()
 
-    time_started = create_processor_response.data.time_started.isoformat()
-    time_finished = create_processor_response.data.time_finished.isoformat()
+    # time_started = create_processor_response.data.time_started.isoformat()
+    # time_finished = create_processor_response.data.time_finished.isoformat()
 
     if document_id is None:
         get_object = object_storage_client.get_object(
